@@ -92,6 +92,16 @@ project/
 └── README.md
 11
 ```
+## Phân chia nhiệm vụ cho từng thành viên
+- Nguyễn Duy Hùng trưởng bộ phận liên quan đến be, tổng kết quá trình, db , làm be liên quan đến phần sinh cho sinh viên.
+- Nguyễn Quỳnh Như làm phần liên quan đến be về giảng viên.
+- Trương Tấn Dũng làm phần be liên quan đến admin.
+- Đỗ Hoàng Sĩ Nguyên làm phần fe liên quan đến sinh viên.
+- Đặng Mai Hương làm phần fe liên quan đến giảng viên, phụ giúp làm figma để tham khảo sơ qua ý tưởng , viết báo cáo cho nhóm.
+- 
+
+
+
 ## Nhiệm vụ
 - Dũng: Làm phần thông báo. Sản phẩm gồm 2 file 
 ```text
