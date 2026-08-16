@@ -105,7 +105,7 @@ Notifications_functions.php
 
 https://github.com/Hungdz3/bt_laptrinhwed/tree/main/BT_buoi2
 
-
+- Nguyên: Làm phần quản lý giảng viên - Sản phẩm gồm file Giangvien.php
 
 
 
