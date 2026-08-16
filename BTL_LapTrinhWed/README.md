@@ -104,3 +104,16 @@ Notifications_functions.php
 - Hùng tạo trang đăng kí học phần
 
 https://github.com/Hungdz3/bt_laptrinhwed/tree/main/BT_buoi2
+
+
+
+
+
+
+
+
+## Chức năng đã được hoàn thiện sau buổi 2
+Hùng:
+tìm kiểm hp 
+trang chủ dki học phần
+số tín chỉ đã dki
