@@ -58,18 +58,6 @@ http://127.0.0.1:8000
 2
 ``
 Show more lines
-6. Tài khoản mẫu
-Admin
-Username: admin
-Password: admin123
-
-Sinh viên
-Username: student01
-Password: 123456
-
-Giảng viên
-Username: lecturer01
-Password: 123456
 
 Chức năng chính
 Đăng nhập và phân quyền người dùng.
@@ -103,3 +91,12 @@ project/
 10
 └── README.md
 11
+```
+## Nhiệm vụ
+- Dũng: Làm phần thông báo. Sản phẩm gồm 2 file 
+```text
+Notifications.php
+```
+```text
+Notifications_functions.php
+```
