@@ -100,3 +100,7 @@ Notifications.php
 ```text
 Notifications_functions.php
 ```
+
+- Hùng tạo trang đăng kí học phần
+- ```text
+https://github.com/Hungdz3/bt_laptrinhwed/tree/main/BT_buoi2
