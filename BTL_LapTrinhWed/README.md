@@ -114,6 +114,6 @@ https://github.com/Hungdz3/bt_laptrinhwed/tree/main/BT_buoi2
 
 ## Chức năng đã được hoàn thiện sau buổi 2
 Hùng:
-tìm kiểm hp 
-trang chủ dki học phần
-số tín chỉ đã dki
+- tìm kiểm hp 
+- trang chủ dki học phần
+- số tín chỉ đã dki
