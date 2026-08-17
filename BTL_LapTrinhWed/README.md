@@ -68,7 +68,6 @@ Tìm kiếm và lọc lớp học phần.
 Quản lý sĩ số và trạng thái đăng ký.
 Cấu trúc thư mục
 
-
 Plain Text
 1
 project/
@@ -97,10 +96,8 @@ project/
 - Nguyễn Quỳnh Như làm phần liên quan đến be về giảng viên.
 - Trương Tấn Dũng làm phần be liên quan đến admin.
 - Đỗ Hoàng Sĩ Nguyên làm phần fe liên quan đến sinh viên.
-- Đặng Mai Hương làm phần fe liên quan đến giảng viên, phụ giúp làm figma để tham khảo sơ qua ý tưởng , viết báo cáo cho nhóm.
-- 
-
-
+- Đặng Mai Hương làm phần fe liên quan đến admin, phụ giúp làm figma để tham khảo sơ qua ý tưởng , viết báo cáo cho nhóm.
+- Nguyễn Đức Anh làm phần fe liên quan đến giảng viên.
 
 ## Nhiệm vụ
 - Dũng: Làm phần thông báo. Sản phẩm gồm 2 file 
@@ -117,11 +114,6 @@ https://github.com/Hungdz3/bt_laptrinhwed/tree/main/BT_buoi2
 
 - Mai Hương tạo Danh sách học phần
 - Như tạo quản lý lịch học 
-
-
-
-
-
 
 ## Chức năng đã được hoàn thiện sau buổi 2
 Hùng:
