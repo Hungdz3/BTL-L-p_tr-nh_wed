@@ -116,7 +116,7 @@ Notifications_functions.php
 https://github.com/Hungdz3/bt_laptrinhwed/tree/main/BT_buoi2
 
 - Mai Hương tạo Danh sách học phần
-  
+- Như tạo quản lý lịch học 
 
 
 
