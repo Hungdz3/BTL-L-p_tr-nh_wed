@@ -1,16 +1,4 @@
 <?php
-/**
- * BUỔI 2 - CÁ NHÂN
- * Đề tài lớn: QUẢN LÝ KHÓA HỌC
- * Đối tượng dữ liệu được chọn: GIẢNG VIÊN
- *
- * Toàn bộ xử lý (kể cả việc "chọn khoa hiện chuyên ngành") đều dùng PHP
- * thuần, không dùng JavaScript. Cách làm: khi người dùng chọn Khoa và bấm
- * nút "Hiện chuyên ngành", form được submit lại (POST), PHP đọc khoa đã
- * chọn và render lại danh sách chuyên ngành tương ứng ngay trong lần tải
- * trang tiếp theo.
- */
-
 session_start();
 
 // Khởi tạo mảng danh sách giảng viên trong session nếu chưa có
@@ -36,14 +24,12 @@ $chuyen_nganh_theo_khoa = [
     'K_GDTC-GDQPAN' => ['Giáo dục thể chất', 'Giáo dục Quốc phòng - An ninh', 'Huấn luyện thể thao'],
 ];
 
+$danh_sach_trinh_do_hople = ['cu_nhan', 'thac_si', 'tien_si', 'pgs_gs'];
+
 // ==================== CÁC HÀM TỰ ĐỊNH NGHĨA ====================
 
 /**
- * Xác định khối ngành dựa trên mã khoa - hàm xử lý nghiệp vụ có ý nghĩa:
- * dùng điều kiện (switch) để phân loại giảng viên theo khoa đang công tác.
- *
- * @param string $maKhoa
- * @return string
+ * Xác định khối ngành dựa trên mã khoa.
  */
 function xacDinhKhoiNganh(string $maKhoa): string
 {
@@ -64,32 +50,21 @@ function xacDinhKhoiNganh(string $maKhoa): string
 }
 
 /**
- * Kiểm tra mã giảng viên đã tồn tại trong danh sách hay chưa (không phân biệt
- * hoa thường, bỏ khoảng trắng thừa). Dùng để chống trùng mã khi thêm mới.
- *
- * @param string $maGv
- * @param array $danh_sach
- * @return bool
+ * Kiểm tra mã giảng viên đã tồn tại trong danh sách hay chưa.
+ * (Mã GV đã được chuẩn hóa viết hoa trước khi so sánh nên so sánh trực tiếp.)
  */
 function maGvDaTonTai(string $maGv, array $danh_sach): bool
 {
-    $ma_can_kiem_tra = mb_strtolower(trim($maGv));
-
     foreach ($danh_sach as $gv) {
-        if (mb_strtolower(trim($gv['ma_gv'])) === $ma_can_kiem_tra) {
+        if ($gv['ma_gv'] === $maGv) {
             return true;
         }
     }
-
     return false;
 }
 
 /**
  * Thống kê số lượng giảng viên theo từng khoa.
- *
- * @param array $danh_sach
- * @param array $danh_sach_khoa
- * @return array Mảng kết hợp mã khoa => số lượng
  */
 function thongKeTheoKhoa(array $danh_sach, array $danh_sach_khoa): array
 {
@@ -97,46 +72,30 @@ function thongKeTheoKhoa(array $danh_sach, array $danh_sach_khoa): array
     foreach ($danh_sach_khoa as $ma_khoa => $ten_khoa) {
         $thong_ke[$ma_khoa] = 0;
     }
-
     foreach ($danh_sach as $gv) {
         if (isset($thong_ke[$gv['ten_khoa']])) {
             $thong_ke[$gv['ten_khoa']]++;
         }
     }
-
     return $thong_ke;
 }
 
 /**
  * Thống kê số lượng giảng viên theo từng trình độ.
- *
- * @param array $danh_sach
- * @return array Mảng kết hợp mã trình độ => số lượng
  */
 function thongKeTheoTrinhDo(array $danh_sach): array
 {
-    $thong_ke = [
-        'cu_nhan' => 0,
-        'thac_si' => 0,
-        'tien_si' => 0,
-        'pgs_gs'  => 0,
-    ];
-
+    $thong_ke = ['cu_nhan' => 0, 'thac_si' => 0, 'tien_si' => 0, 'pgs_gs' => 0];
     foreach ($danh_sach as $gv) {
         if (isset($thong_ke[$gv['trinh_do']])) {
             $thong_ke[$gv['trinh_do']]++;
         }
     }
-
     return $thong_ke;
 }
 
 /**
  * Chuyển mã khoa thành tên khoa đầy đủ để hiển thị.
- *
- * @param string $maKhoa
- * @param array $danh_sach_khoa
- * @return string
  */
 function tenKhoaDayDu(string $maKhoa, array $danh_sach_khoa): string
 {
@@ -144,11 +103,7 @@ function tenKhoaDayDu(string $maKhoa, array $danh_sach_khoa): string
 }
 
 /**
- * Chuẩn hóa/định dạng nhãn trình độ để hiển thị (dùng switch để minh họa
- * thêm một dạng cấu trúc điều kiện khác so với if/else ở trên).
- *
- * @param string $maTrinhDo
- * @return string
+ * Chuẩn hóa/định dạng nhãn trình độ để hiển thị.
  */
 function formatTrinhDo(string $maTrinhDo): string
 {
@@ -167,92 +122,176 @@ function formatTrinhDo(string $maTrinhDo): string
 }
 
 /**
- * Kiểm tra dữ liệu nhập từ form. Trả về mảng lỗi (rỗng nếu hợp lệ).
- *
- * @param array $du_lieu
- * @param array $danh_sach_khoa
- * @param array $danh_sach_hien_co
- * @return array
+ * ---- MỚI (Buổi 3) ----
+ * Chuẩn hóa một chuỗi văn bản thường: cắt khoảng trắng 2 đầu, gộp nhiều
+ * khoảng trắng liên tiếp ở giữa thành 1 khoảng trắng.
  */
-function kiemTraDuLieuNhap(array $du_lieu, array $danh_sach_khoa, array $danh_sach_hien_co): array
+function chuanHoaChuoi(string $chuoi): string
 {
+    $chuoi = trim($chuoi);
+    $chuoi = preg_replace('/\s+/u', ' ', $chuoi);
+    return $chuoi;
+}
+
+/**
+ * ---- MỚI (Buổi 3) ----
+ * Chuẩn hóa mã giảng viên: chuẩn hóa khoảng trắng như trên rồi viết hoa
+ * toàn bộ để tránh trùng mã do khác nhau chữ hoa/thường (vd "gv001" và
+ * "GV001" sẽ được xem là một).
+ */
+function chuanHoaMaGV(string $maGv): string
+{
+    return strtoupper(chuanHoaChuoi($maGv));
+}
+
+/**
+ * ---- MỚI (Buổi 3) ----
+ * Kiểm tra dữ liệu nhập từ form theo TỪNG TRƯỜNG.
+ * Trả về mảng dạng ['ten_truong' => 'thông báo lỗi', ...] (rỗng = hợp lệ).
+ *
+ * Quy tắc kiểm tra:
+ *  - ma_gv    : bắt buộc, chỉ gồm chữ IN HOA/số, dài 3-10 ký tự, không trùng.
+ *  - ho_ten   : bắt buộc, dài 2-100 ký tự, chỉ gồm chữ cái (có dấu) và khoảng trắng.
+ *  - ten_khoa : bắt buộc, phải thuộc danh sách khoa hợp lệ.
+ *  - bo_mon   : bắt buộc, phải thuộc đúng danh sách chuyên ngành của khoa đã chọn.
+ *  - trinh_do : bắt buộc, phải thuộc danh sách trình độ hợp lệ.
+ */
+function kiemTraDuLieuNhap(
+    array $du_lieu,
+    array $danh_sach_khoa,
+    array $chuyen_nganh_theo_khoa,
+    array $danh_sach_trinh_do_hople,
+    array $danh_sach_hien_co
+): array {
     $loi = [];
 
-    if (trim($du_lieu['ma_gv']) === '') {
-        $loi[] = "Mã giảng viên không được để trống.";
-    } elseif (maGvDaTonTai($du_lieu['ma_gv'], $danh_sach_hien_co)) {
-        $loi[] = "Mã giảng viên \"{$du_lieu['ma_gv']}\" đã tồn tại, vui lòng nhập mã khác.";
+    // ----- Mã giảng viên -----
+    $ma_gv = $du_lieu['ma_gv'];
+    if ($ma_gv === '') {
+        $loi['ma_gv'] = "Mã giảng viên không được để trống.";
+    } elseif (!preg_match('/^[A-Z0-9]{3,10}$/', $ma_gv)) {
+        $loi['ma_gv'] = "Mã giảng viên chỉ gồm chữ in hoa/số, dài từ 3 đến 10 ký tự (VD: GV001).";
+    } elseif (maGvDaTonTai($ma_gv, $danh_sach_hien_co)) {
+        $loi['ma_gv'] = "Mã giảng viên \"{$ma_gv}\" đã tồn tại, vui lòng nhập mã khác.";
     }
-    if (trim($du_lieu['ho_ten']) === '') {
-        $loi[] = "Họ tên không được để trống.";
+
+    // ----- Họ tên -----
+    $ho_ten = $du_lieu['ho_ten'];
+    $do_dai_ho_ten = mb_strlen($ho_ten);
+    if ($ho_ten === '') {
+        $loi['ho_ten'] = "Họ tên không được để trống.";
+    } elseif ($do_dai_ho_ten < 2 || $do_dai_ho_ten > 100) {
+        $loi['ho_ten'] = "Họ tên phải có độ dài từ 2 đến 100 ký tự.";
+    } elseif (!preg_match('/^[\p{L}\s]+$/u', $ho_ten)) {
+        $loi['ho_ten'] = "Họ tên chỉ được chứa chữ cái và khoảng trắng, không chứa số hay ký tự đặc biệt.";
     }
-    if (!array_key_exists($du_lieu['ten_khoa'], $danh_sach_khoa)) {
-        $loi[] = "Vui lòng chọn khoa hợp lệ.";
+
+    // ----- Khoa -----
+    if ($du_lieu['ten_khoa'] === '') {
+        $loi['ten_khoa'] = "Vui lòng chọn khoa.";
+    } elseif (!array_key_exists($du_lieu['ten_khoa'], $danh_sach_khoa)) {
+        $loi['ten_khoa'] = "Khoa được chọn không hợp lệ.";
     }
-    if (trim($du_lieu['bo_mon']) === '') {
-        $loi[] = "Vui lòng chọn chuyên ngành (bấm nút \"Hiện chuyên ngành\" sau khi chọn khoa).";
+
+    // ----- Chuyên ngành (phải khớp với khoa đã chọn, chống dữ liệu giả mạo) -----
+    if ($du_lieu['bo_mon'] === '') {
+        $loi['bo_mon'] = "Vui lòng chọn chuyên ngành (bấm \"Hiện chuyên ngành\" sau khi chọn khoa).";
+    } elseif (
+        !isset($loi['ten_khoa'])
+        && isset($chuyen_nganh_theo_khoa[$du_lieu['ten_khoa']])
+        && !in_array($du_lieu['bo_mon'], $chuyen_nganh_theo_khoa[$du_lieu['ten_khoa']], true)
+    ) {
+        $loi['bo_mon'] = "Chuyên ngành không thuộc khoa đã chọn.";
     }
-    if (!in_array($du_lieu['trinh_do'], ['cu_nhan', 'thac_si', 'tien_si', 'pgs_gs'], true)) {
-        $loi[] = "Trình độ không hợp lệ.";
+
+    // ----- Trình độ -----
+    if ($du_lieu['trinh_do'] === '') {
+        $loi['trinh_do'] = "Vui lòng chọn trình độ.";
+    } elseif (!in_array($du_lieu['trinh_do'], $danh_sach_trinh_do_hople, true)) {
+        $loi['trinh_do'] = "Trình độ không hợp lệ.";
     }
 
     return $loi;
 }
 
+/**
+ * ---- MỚI (Buổi 3) ----
+ * In ra thông báo lỗi (đã escape) ngay dưới 1 trường, nếu trường đó có lỗi.
+ */
+function inLoiTruong(string $ten_truong, array $thong_bao_loi): void
+{
+    if (isset($thong_bao_loi[$ten_truong])) {
+        echo '<span class="loi">' . htmlspecialchars($thong_bao_loi[$ten_truong]) . '</span>';
+    }
+}
+
+/**
+ * ---- MỚI (Buổi 3) ----
+ * Trả về class CSS "co-loi" nếu trường đang có lỗi, để tô viền đỏ cho input.
+ */
+function classLoiTruong(string $ten_truong, array $thong_bao_loi): string
+{
+    return isset($thong_bao_loi[$ten_truong]) ? 'co-loi' : '';
+}
+
 // ==================== XỬ LÝ FORM (POST) ====================
 
-$thong_bao_loi = [];
+$thong_bao_loi = [];          // Mảng lỗi theo từng trường: ['ma_gv' => '...', ...]
 $thong_bao_thanh_cong = '';
 
-// Giữ lại dữ liệu người dùng đã nhập/chọn để hiển thị lại trên form
-// (kể cả khi chỉ bấm nút "Hiện chuyên ngành" hoặc khi có lỗi).
+// Đọc dữ liệu người dùng nhập và CHUẨN HÓA NGAY (Buổi 3) trước khi dùng ở bất
+// kỳ đâu (validate, hiển thị lại, lưu...).
 $gia_tri_form = [
-    'ma_gv'    => $_POST['ma_gv'] ?? '',
-    'ho_ten'   => $_POST['ho_ten'] ?? '',
-    'ten_khoa' => $_POST['ten_khoa'] ?? '',
-    'bo_mon'   => $_POST['bo_mon'] ?? '',
-    'trinh_do' => $_POST['trinh_do'] ?? '',
+    'ma_gv'    => chuanHoaMaGV($_POST['ma_gv'] ?? ''),
+    'ho_ten'   => chuanHoaChuoi($_POST['ho_ten'] ?? ''),
+    'ten_khoa' => trim($_POST['ten_khoa'] ?? ''),
+    'bo_mon'   => trim($_POST['bo_mon'] ?? ''),
+    'trinh_do' => trim($_POST['trinh_do'] ?? ''),
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hien_chuyen_nganh'])) {
-    // Người dùng chỉ vừa chọn khoa và bấm "Hiện chuyên ngành":
-    // không thêm giảng viên, chỉ load lại trang để hiện danh sách chuyên ngành.
-    // Chuyên ngành đã chọn trước đó (nếu có) không còn phù hợp với khoa mới nên xóa đi.
+    // Chỉ bấm "Hiện chuyên ngành": không thêm giảng viên, không validate.
+    // Chuyên ngành cũ (nếu có) không còn phù hợp với khoa mới nên xóa đi.
     $gia_tri_form['bo_mon'] = '';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['them_giang_vien'])) {
 
-    // Kiểm tra dữ liệu (điều kiện) - bao gồm kiểm tra trùng mã giảng viên
-    $thong_bao_loi = kiemTraDuLieuNhap($gia_tri_form, $danh_sach_khoa, $_SESSION['danh_sach_giang_vien']);
+    // Kiểm tra dữ liệu theo từng trường (Buổi 3)
+    $thong_bao_loi = kiemTraDuLieuNhap(
+        $gia_tri_form,
+        $danh_sach_khoa,
+        $chuyen_nganh_theo_khoa,
+        $danh_sach_trinh_do_hople,
+        $_SESSION['danh_sach_giang_vien']
+    );
 
     if (empty($thong_bao_loi)) {
-        // Tổ chức dữ liệu bằng mảng kết hợp (1 phần tử = 1 giảng viên)
+        // Lưu dữ liệu THÔ đã chuẩn hóa (KHÔNG htmlspecialchars ở đây).
+        // Việc chống XSS sẽ thực hiện ở bước HIỂN THỊ ra HTML bên dưới.
         $giang_vien_moi = [
-            'ma_gv'    => htmlspecialchars(trim($gia_tri_form['ma_gv'])),
-            'ho_ten'   => htmlspecialchars(trim($gia_tri_form['ho_ten'])),
+            'ma_gv'    => $gia_tri_form['ma_gv'],
+            'ho_ten'   => $gia_tri_form['ho_ten'],
             'ten_khoa' => $gia_tri_form['ten_khoa'],
-            'bo_mon'   => htmlspecialchars(trim($gia_tri_form['bo_mon'])),
+            'bo_mon'   => $gia_tri_form['bo_mon'],
             'trinh_do' => $gia_tri_form['trinh_do'],
         ];
 
-        // Thêm vào mảng danh sách (lưu trong session để tái sử dụng)
+        // Chưa yêu cầu lưu CSDL -> vẫn lưu trong session (Buổi 2 & 3 giống nhau)
         $_SESSION['danh_sach_giang_vien'][] = $giang_vien_moi;
 
-        $thong_bao_thanh_cong = "Đã thêm giảng viên \"{$giang_vien_moi['ho_ten']}\" vào danh sách.";
+        $thong_bao_thanh_cong = "Đã thêm giảng viên \"" . htmlspecialchars($giang_vien_moi['ho_ten']) . "\" vào danh sách.";
 
         // Thêm thành công thì làm trống lại form
         $gia_tri_form = [
-            'ma_gv'    => '',
-            'ho_ten'   => '',
-            'ten_khoa' => '',
-            'bo_mon'   => '',
-            'trinh_do' => '',
+            'ma_gv' => '', 'ho_ten' => '', 'ten_khoa' => '', 'bo_mon' => '', 'trinh_do' => '',
         ];
     }
+    // Nếu có lỗi: KHÔNG làm gì thêm -> $gia_tri_form vẫn giữ nguyên các giá
+    // trị (kể cả các trường hợp lệ) để hiển thị lại cho người dùng (Buổi 3).
 }
 
-// Xử lý xóa 1 giảng viên khỏi danh sách (tiện ích thêm, không bắt buộc)
+// Xử lý xóa 1 giảng viên khỏi danh sách
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['xoa_index'])) {
     $index = (int)$_POST['xoa_index'];
     if (isset($_SESSION['danh_sach_giang_vien'][$index])) {
@@ -264,13 +303,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['xoa_index'])) {
 $danh_sach = $_SESSION['danh_sach_giang_vien'];
 $tong_so_giang_vien = count($danh_sach);
 
-// Danh sách chuyên ngành sẽ hiện ra tương ứng với khoa đã chọn trên form (nếu có)
+// Danh sách chuyên ngành sẽ hiện ra tương ứng với khoa đã chọn trên form
 $chuyen_nganh_hien_thi = [];
 if ($gia_tri_form['ten_khoa'] !== '' && isset($chuyen_nganh_theo_khoa[$gia_tri_form['ten_khoa']])) {
     $chuyen_nganh_hien_thi = $chuyen_nganh_theo_khoa[$gia_tri_form['ten_khoa']];
 }
 
-// Thống kê nhanh (tính sẵn ở đây để dùng khi render)
+// Thống kê nhanh
 $thong_ke_khoa      = thongKeTheoKhoa($danh_sach, $danh_sach_khoa);
 $thong_ke_trinh_do  = thongKeTheoTrinhDo($danh_sach);
 
@@ -288,6 +327,16 @@ foreach ($thong_ke_khoa as $ma_khoa => $so_luong) {
 <head>
 <meta charset="UTF-8">
 <title>Quản lý Giảng viên - Hệ thống Quản lý Khóa học</title>
+<style>
+    body { font-family: Arial, sans-serif; }
+    .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+    .loi { display: block; color: #c0392b; font-size: 0.9em; margin-top: 2px; }
+    .co-loi { border: 2px solid #c0392b !important; }
+    .thanh-cong { color: #1e7e34; font-weight: bold; }
+    .hop-loi-chung { border: 1px solid #c0392b; background: #fdecea; padding: 10px 15px; margin-bottom: 15px; }
+    table { border-collapse: collapse; margin-bottom: 20px; }
+    th, td { padding: 6px 10px; }
+</style>
 </head>
 <body>
 <div class="container">
@@ -296,8 +345,8 @@ foreach ($thong_ke_khoa as $ma_khoa => $so_luong) {
     <p>Chức năng: Quản lý Giảng viên</p>
 
     <?php if (!empty($thong_bao_loi)): ?>
-        <div>
-            <strong>Dữ liệu chưa hợp lệ:</strong>
+        <div class="hop-loi-chung">
+            <strong>Dữ liệu chưa hợp lệ, vui lòng kiểm tra lại các trường được đánh dấu bên dưới:</strong>
             <ul>
                 <?php foreach ($thong_bao_loi as $loi): ?>
                     <li><?= htmlspecialchars($loi) ?></li>
@@ -307,25 +356,29 @@ foreach ($thong_ke_khoa as $ma_khoa => $so_luong) {
     <?php endif; ?>
 
     <?php if ($thong_bao_thanh_cong !== ''): ?>
-        <p><?= $thong_bao_thanh_cong ?></p>
+        <p class="thanh-cong"><?= $thong_bao_thanh_cong ?></p>
     <?php endif; ?>
 
     <!-- ==================== FORM NHẬP THÔNG TIN GIẢNG VIÊN ==================== -->
     <h2>Thêm giảng viên mới</h2>
-    <form method="POST" action="">
+    <form method="POST" action="" novalidate>
         <p>
             <label for="ma_gv">Mã giảng viên</label><br>
             <input type="text" id="ma_gv" name="ma_gv" placeholder="VD: GV001"
-                   value="<?= htmlspecialchars($gia_tri_form['ma_gv']) ?>" required>
+                   class="<?= classLoiTruong('ma_gv', $thong_bao_loi) ?>"
+                   value="<?= htmlspecialchars($gia_tri_form['ma_gv']) ?>">
+            <?php inLoiTruong('ma_gv', $thong_bao_loi); ?>
         </p>
         <p>
             <label for="ho_ten">Họ và tên</label><br>
             <input type="text" id="ho_ten" name="ho_ten" placeholder="VD: Nguyễn Văn A"
-                   value="<?= htmlspecialchars($gia_tri_form['ho_ten']) ?>" required>
+                   class="<?= classLoiTruong('ho_ten', $thong_bao_loi) ?>"
+                   value="<?= htmlspecialchars($gia_tri_form['ho_ten']) ?>">
+            <?php inLoiTruong('ho_ten', $thong_bao_loi); ?>
         </p>
         <p>
             <label for="ten_khoa">Khoa</label><br>
-            <select id="ten_khoa" name="ten_khoa" required>
+            <select id="ten_khoa" name="ten_khoa" class="<?= classLoiTruong('ten_khoa', $thong_bao_loi) ?>">
                 <option value="">-- Chọn Khoa --</option>
                 <?php foreach ($danh_sach_khoa as $ma => $ten): ?>
                     <option value="<?= htmlspecialchars($ma) ?>"
@@ -335,6 +388,7 @@ foreach ($thong_ke_khoa as $ma_khoa => $so_luong) {
                 <?php endforeach; ?>
             </select>
             <button type="submit" name="hien_chuyen_nganh">Hiện chuyên ngành</button>
+            <?php inLoiTruong('ten_khoa', $thong_bao_loi); ?>
         </p>
         <p>
             <label for="bo_mon">Chuyên ngành</label><br>
@@ -343,7 +397,7 @@ foreach ($thong_ke_khoa as $ma_khoa => $so_luong) {
                     <option value="">-- Chọn khoa rồi bấm "Hiện chuyên ngành" --</option>
                 </select>
             <?php else: ?>
-                <select id="bo_mon" name="bo_mon" required>
+                <select id="bo_mon" name="bo_mon" class="<?= classLoiTruong('bo_mon', $thong_bao_loi) ?>">
                     <option value="">-- Chọn chuyên ngành --</option>
                     <?php foreach ($chuyen_nganh_hien_thi as $chuyen_nganh): ?>
                         <option value="<?= htmlspecialchars($chuyen_nganh) ?>"
@@ -353,21 +407,20 @@ foreach ($thong_ke_khoa as $ma_khoa => $so_luong) {
                     <?php endforeach; ?>
                 </select>
             <?php endif; ?>
+            <?php inLoiTruong('bo_mon', $thong_bao_loi); ?>
         </p>
         <p>
             <label for="trinh_do">Trình độ</label><br>
-            <select id="trinh_do" name="trinh_do" required>
+            <select id="trinh_do" name="trinh_do" class="<?= classLoiTruong('trinh_do', $thong_bao_loi) ?>">
                 <option value="">-- Chọn trình độ --</option>
-                <?php
-                $danh_sach_trinh_do = ['cu_nhan', 'thac_si', 'tien_si', 'pgs_gs'];
-                foreach ($danh_sach_trinh_do as $ma_trinh_do):
-                ?>
+                <?php foreach ($danh_sach_trinh_do_hople as $ma_trinh_do): ?>
                     <option value="<?= $ma_trinh_do ?>"
                         <?= $gia_tri_form['trinh_do'] === $ma_trinh_do ? 'selected' : '' ?>>
                         <?= formatTrinhDo($ma_trinh_do) ?>
                     </option>
                 <?php endforeach; ?>
             </select>
+            <?php inLoiTruong('trinh_do', $thong_bao_loi); ?>
         </p>
         <p>
             <button type="submit" name="them_giang_vien">Thêm giảng viên</button>
@@ -384,40 +437,24 @@ foreach ($thong_ke_khoa as $ma_khoa => $so_luong) {
 
     <h3>Theo khoa</h3>
     <table border="1" cellpadding="6" cellspacing="0">
-        <tr>
-            <th>Khoa</th>
-            <th>Số lượng</th>
-            <th>Tỉ lệ</th>
-        </tr>
+        <tr><th>Khoa</th><th>Số lượng</th><th>Tỉ lệ</th></tr>
         <?php foreach ($danh_sach_khoa as $ma_khoa => $ten_khoa_full): ?>
             <tr>
                 <td><?= htmlspecialchars($ten_khoa_full) ?></td>
                 <td><?= $thong_ke_khoa[$ma_khoa] ?></td>
-                <td>
-                    <?= $tong_so_giang_vien > 0
-                        ? round($thong_ke_khoa[$ma_khoa] / $tong_so_giang_vien * 100) . '%'
-                        : '0%' ?>
-                </td>
+                <td><?= $tong_so_giang_vien > 0 ? round($thong_ke_khoa[$ma_khoa] / $tong_so_giang_vien * 100) . '%' : '0%' ?></td>
             </tr>
         <?php endforeach; ?>
     </table>
 
     <h3>Theo trình độ</h3>
     <table border="1" cellpadding="6" cellspacing="0">
-        <tr>
-            <th>Trình độ</th>
-            <th>Số lượng</th>
-            <th>Tỉ lệ</th>
-        </tr>
+        <tr><th>Trình độ</th><th>Số lượng</th><th>Tỉ lệ</th></tr>
         <?php foreach ($thong_ke_trinh_do as $ma_trinh_do => $so_luong): ?>
             <tr>
                 <td><?= formatTrinhDo($ma_trinh_do) ?></td>
                 <td><?= $so_luong ?></td>
-                <td>
-                    <?= $tong_so_giang_vien > 0
-                        ? round($so_luong / $tong_so_giang_vien * 100) . '%'
-                        : '0%' ?>
-                </td>
+                <td><?= $tong_so_giang_vien > 0 ? round($so_luong / $tong_so_giang_vien * 100) . '%' : '0%' ?></td>
             </tr>
         <?php endforeach; ?>
     </table>
@@ -429,31 +466,22 @@ foreach ($thong_ke_khoa as $ma_khoa => $so_luong) {
     <?php else: ?>
         <table border="1" cellpadding="6" cellspacing="0">
             <tr>
-                <th>STT</th>
-                <th>Mã GV</th>
-                <th>Họ tên</th>
-                <th>Khoa</th>
-                <th>Chuyên ngành</th>
-                <th>Trình độ</th>
-                <th>Khối ngành</th>
-                <th></th>
+                <th>STT</th><th>Mã GV</th><th>Họ tên</th><th>Khoa</th>
+                <th>Chuyên ngành</th><th>Trình độ</th><th>Khối ngành</th><th></th>
             </tr>
-            <?php
-            // Dùng vòng lặp for để duyệt mảng và hiển thị theo dạng bảng
-            for ($i = 0; $i < count($danh_sach); $i++):
+            <?php for ($i = 0; $i < count($danh_sach); $i++):
                 $gv = $danh_sach[$i];
-
-                // Gọi hàm tự định nghĩa để xử lý nghiệp vụ
                 $khoi_nganh       = xacDinhKhoiNganh($gv['ten_khoa']);
                 $ten_khoa_hienthi = tenKhoaDayDu($gv['ten_khoa'], $danh_sach_khoa);
                 $trinh_do_hienthi = formatTrinhDo($gv['trinh_do']);
             ?>
                 <tr>
                     <td><?= $i + 1 ?></td>
-                    <td><?= $gv['ma_gv'] ?></td>
-                    <td><?= $gv['ho_ten'] ?></td>
+                    <!-- Buổi 3: escape ngay tại thời điểm hiển thị để chống XSS -->
+                    <td><?= htmlspecialchars($gv['ma_gv']) ?></td>
+                    <td><?= htmlspecialchars($gv['ho_ten']) ?></td>
                     <td><?= htmlspecialchars($ten_khoa_hienthi) ?></td>
-                    <td><?= $gv['bo_mon'] ?></td>
+                    <td><?= htmlspecialchars($gv['bo_mon']) ?></td>
                     <td><?= $trinh_do_hienthi ?></td>
                     <td><?= $khoi_nganh ?></td>
                     <td>
