@@ -25,35 +25,62 @@ $notifications = [
     ]
 ];
 
+$title = "";
+$description = "";
+$image_url = "";
+
+$error_title = "";
+$error_description = "";
+$error_image = "";
+
+$success = "";
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
-    $id = count($notifications) + 1;
-    $title = $_POST["title"];
-    $description = $_POST["description"];
-    $image_url = $_POST["image_url"];
+    $title = trim($_POST["title"] ?? "");
+    $description = trim($_POST["description"] ?? "");
+    $image_url = trim($_POST["image_url"] ?? "");
 
-    $notifications[] = [
-        "id" => $id,
-        "title" => $title,
-        "description" => $description,
-        "image_url" => $image_url
-    ];
-}
+    if ($title === "") {
+        $error_title = "Vui lòng nhập tiêu đề.";
+    }
 
-foreach ($notifications as $notification) {
+    if ($description === "") {
+        $error_description = "Vui lòng nhập nội dung.";
+    }
 
-    echo "ID: " . $notification["id"] . "<br>";
-    echo "Tiêu đề: " . $notification["title"] . "<br>";
-    echo "Nội dung: " . $notification["description"] . "<br>";
-    echo "Hình ảnh: " . $notification["image_url"] . "<br>";
+    if ($image_url === "") {
+        $error_image = "Vui lòng nhập URL hình ảnh.";
+    } elseif (!filter_var($image_url, FILTER_VALIDATE_URL)) {
+        $error_image = "Image URL không hợp lệ.";
+    } elseif (!preg_match(
+        '/\.(jpg|jpeg|png|gif|webp|svg)(\?.*)?$/i',
+        $image_url
+    )) {
+        $error_image = "URL phải là link hình ảnh (.jpg, .jpeg, .png, .gif, .webp hoặc .svg).";
+    }
 
-    echo "Trạng thái: " .
-        getNotificationStatus(
-            $notification["title"],
-            $notification["description"]
-        ) . "<br>";
+    if (
+        $error_title === "" &&
+        $error_description === "" &&
+        $error_image === ""
+    ) {
 
-    echo "<hr>";
+        $id = count($notifications) + 1;
+
+        $notifications[] = [
+            "id" => $id,
+            "title" => $title,
+            "description" => $description,
+            "image_url" => $image_url
+        ];
+
+        $success = "Thêm thông báo thành công!";
+
+        $title = "";
+        $description = "";
+        $image_url = "";
+    }
 }
 
 ?>
@@ -72,21 +99,67 @@ foreach ($notifications as $notification) {
 
 <h2>Thêm thông báo</h2>
 
+<?php if ($success !== "") { ?>
+    <p style="color: green; font-weight: bold;">
+        <?php echo htmlspecialchars($success); ?>
+    </p>
+<?php } ?>
+
 <form method="POST">
 
     <label>Tiêu đề:</label>
-    <input type="text" name="title" required>
+
+    <input
+        type="text"
+        name="title"
+        value="<?php echo htmlspecialchars($title); ?>"
+    >
+
+    <?php if ($error_title !== "") { ?>
+        <p style="color: red;">
+            <?php echo htmlspecialchars($error_title); ?>
+        </p>
+    <?php } ?>
+
     <br><br>
 
     <label>Nội dung:</label>
-    <textarea name="description" required></textarea>
+
+    <br>
+
+    <textarea
+        name="description"
+        rows="5"
+        cols="50"
+    ><?php echo htmlspecialchars($description); ?></textarea>
+
+    <?php if ($error_description !== "") { ?>
+        <p style="color: red;">
+            <?php echo htmlspecialchars($error_description); ?>
+        </p>
+    <?php } ?>
+
     <br><br>
 
     <label>Image URL:</label>
-    <input type="text" name="image_url" required>
+
+    <input
+        type="text"
+        name="image_url"
+        value="<?php echo htmlspecialchars($image_url); ?>"
+    >
+
+    <?php if ($error_image !== "") { ?>
+        <p style="color: red;">
+            <?php echo htmlspecialchars($error_image); ?>
+        </p>
+    <?php } ?>
+
     <br><br>
 
-    <button type="submit">Thêm thông báo</button>
+    <button type="submit">
+        Thêm thông báo
+    </button>
 
 </form>
 
@@ -97,28 +170,32 @@ foreach ($notifications as $notification) {
 <?php foreach ($notifications as $notification) { ?>
 
     <img
-        src="<?php echo $notification["image_url"]; ?>"
+        src="<?php echo htmlspecialchars($notification["image_url"]); ?>"
         width="300"
+        alt="<?php echo htmlspecialchars($notification["title"]); ?>"
     >
 
     <h3>
-        <?php echo $notification["title"]; ?>
+        <?php echo htmlspecialchars($notification["title"]); ?>
     </h3>
 
     <p>
-        <?php echo $notification["description"]; ?>
+        <?php echo htmlspecialchars($notification["description"]); ?>
     </p>
 
     <p>
-        ID: <?php echo $notification["id"]; ?>
+        <strong>ID:</strong>
+        <?php echo $notification["id"]; ?>
     </p>
 
     <p>
-        Trạng thái:
+        <strong>Trạng thái:</strong>
         <?php
-        echo getNotificationStatus(
-            $notification["title"],
-            $notification["description"]
+        echo htmlspecialchars(
+            getNotificationStatus(
+                $notification["title"],
+                $notification["description"]
+            )
         );
         ?>
     </p>
