@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tai_khoan'])) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Đăng nhập - Cổng thông tin sinh viên | Trường Đại học HNDA</title>
+<title><?php echo $loaiTaiKhoan === 'giangvien' ? 'Đăng nhập giảng viên' : 'Đăng nhập sinh viên'; ?> | Trường Đại học HNDA</title>
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -70,18 +70,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tai_khoan'])) {
                 <div class="logo-icon">A</div>
                 <div class="logo-text">
                     <span class="logo-title">TRƯỜNG ĐẠI HỌC HNDA</span>
-                    <span class="logo-subtitle">CỔNG THÔNG TIN SINH VIÊN</span>
+                    <span class="logo-subtitle"><?php echo $loaiTaiKhoan === 'giangvien' ? 'CỔNG THÔNG TIN GIẢNG VIÊN' : 'CỔNG THÔNG TIN SINH VIÊN'; ?></span>
                 </div>
             </div>
         </header>
 
         <nav class="navbar">
             <ul>
-                <li><a href="#" class="active">TRANG CHỦ</a></li>
-                <li><a href="#">THÔNG BÁO</a></li>
-                <li><a href="#">DANH SÁCH HỌC PHẦN</a></li>
-                <li><a href="#">ĐĂNG KÝ HỌC PHẦN</a></li>
-                <li><a href="#">LỊCH HỌC</a></li>
+                <?php if ($loaiTaiKhoan === 'giangvien'): ?>
+                    <li><a href="#" class="active">TRANG CHỦ</a></li>
+                    <li><a href="#">THÔNG BÁO</a></li>
+                    <li><a href="#">LỊCH GIẢNG DẠY</a></li>
+                    <li><a href="#">QUẢN LÝ ĐIỂM</a></li>
+                <?php else: ?>
+                    <li><a href="#" class="active">TRANG CHỦ</a></li>
+                    <li><a href="#">THÔNG BÁO</a></li>
+                    <li><a href="#">DANH SÁCH HỌC PHẦN</a></li>
+                    <li><a href="#">ĐĂNG KÝ HỌC PHẦN</a></li>
+                    <li><a href="#">LỊCH HỌC</a></li>
+                <?php endif; ?>
             </ul>
         </nav>
 
@@ -129,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tai_khoan'])) {
                 <label for="mat_khau">Mật khẩu</label>
                 <input type="password" id="mat_khau" name="mat_khau" placeholder="Nhập mật khẩu" autocomplete="current-password">
 
-                <a href="quen-mat-khau.php" class="forgot-link">Quên mật khẩu ?</a>
+                <a href="quen-mat-khau.php?loai_tk=<?php echo htmlspecialchars($loaiTaiKhoan); ?>" class="forgot-link">Quên mật khẩu ?</a>
 
                 <button type="submit" class="btn-login">ĐĂNG NHẬP</button>
             </form>

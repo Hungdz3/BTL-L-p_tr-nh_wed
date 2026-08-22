@@ -2,6 +2,13 @@
 // Trang khôi phục mật khẩu - Cổng thông tin sinh viên - Trường Đại học HNDA
 require_once __DIR__ . '/config/database.php';
 
+// Xác định loại tài khoản đang thao tác (sinh viên hoặc giảng viên) để đổi label cho khớp
+$loaiTaiKhoan = $_POST['loai_tk'] ?? $_GET['loai_tk'] ?? 'sinhvien';
+if (!in_array($loaiTaiKhoan, ['sinhvien', 'giangvien'], true)) {
+    $loaiTaiKhoan = 'sinhvien';
+}
+$nhanMa = $loaiTaiKhoan === 'giangvien' ? 'Mã giảng viên' : 'Mã sinh viên';
+
 $loi = '';
 $thanhCong = '';
 
@@ -91,8 +98,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="POST" action="quen-mat-khau.php" class="recover-form">
-            <label for="ma_sv">Mã sinh viên/ Email</label>
-            <input type="text" id="ma_sv" name="ma_sv" placeholder="Nhập mã sinh viên" value="<?php echo htmlspecialchars($_POST['ma_sv'] ?? ''); ?>">
+            <input type="hidden" name="loai_tk" value="<?php echo htmlspecialchars($loaiTaiKhoan); ?>">
+
+            <label for="ma_sv"><?php echo $nhanMa; ?>/ Email</label>
+            <input type="text" id="ma_sv" name="ma_sv" placeholder="Nhập <?php echo mb_strtolower($nhanMa); ?>" value="<?php echo htmlspecialchars($_POST['ma_sv'] ?? ''); ?>">
 
             <label for="ho_ten">Họ và tên</label>
             <input type="text" id="ho_ten" name="ho_ten" placeholder="Nhập họ và tên" value="<?php echo htmlspecialchars($_POST['ho_ten'] ?? ''); ?>">
@@ -105,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <div class="recover-actions">
                 <button type="submit" class="btn-recover">KHÔI PHỤC MẬT KHẨU</button>
-                <a href="index.php" class="btn-back-login">ĐĂNG NHẬP</a>
+                <a href="index.php?loai_tk=<?php echo htmlspecialchars($loaiTaiKhoan); ?>" class="btn-back-login">ĐĂNG NHẬP</a>
             </div>
         </form>
     </div>
