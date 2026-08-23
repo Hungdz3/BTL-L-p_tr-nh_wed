@@ -136,8 +136,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tai_khoan'])) {
                 <label for="mat_khau">Mật khẩu</label>
                 <input type="password" id="mat_khau" name="mat_khau" placeholder="Nhập mật khẩu" autocomplete="current-password">
 
-                <a href="quen-mat-khau.php?loai_tk=<?php echo htmlspecialchars($loaiTaiKhoan); ?>" class="forgot-link">Quên mật khẩu ?</a>
-
                 <button type="submit" class="btn-login">ĐĂNG NHẬP</button>
             </form>
         </div>
