@@ -1,11 +1,11 @@
 <?php
 // config/db.php
 
-define('DB_HOST', '26.249.30.110');
-define('DB_PORT', '3330');
-define('DB_NAME', 'dkyhocphan');
-define('DB_USER', 'dung');
-define('DB_PASS', '123456');
+define('DB_HOST', '');
+define('DB_PORT', '');
+define('DB_NAME', '');
+define('DB_USER', '');
+define('DB_PASS', '');
 function getDB(): PDO {
     static $pdo = null;
 
